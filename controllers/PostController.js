@@ -14,6 +14,10 @@ const index = async (req, res) => {
         const data = await prisma.post.findMany({
             take: +pageSize,
             skip: (+page - 1) * +pageSize,
+            include: {
+                category: true,
+                tags: true
+            }
         });
 
         res.json({
@@ -21,7 +25,8 @@ const index = async (req, res) => {
             currentPage: +page,
             totalPages: totalPages,
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         res.status(500).send("Internal Server Error");
     }
@@ -33,7 +38,8 @@ const show = async (req, res) => {
     try {
         const { slug } = req.params;
         const data = await prisma.post.findUnique({
-            where: { slug: slug }
+            where: { slug: slug },
+            include: { category: { select: { title: true } }, tags: { select: { title: true } } }
         });
 
         if (!data) {
@@ -49,10 +55,33 @@ const show = async (req, res) => {
 
 
 
-
-const store = async (req, res) => {
+const store = async (req, res, next) => {
     try {
-        const { title, content, image, published, category } = req.body;
+        const { title, content, image, published, category, tags } = req.body;
+
+        // Verifica se la categoria esiste
+        const existingCategory = await prisma.category.findUnique({
+            where: { id: category }
+        });
+
+        if (!existingCategory) {
+            return next(new Error("La categoria specificata non esiste"));
+        }
+
+
+        // Verifica se i tag esistono
+        const existingTags = await prisma.tag.findMany({
+            where: { id: { in: tags } }
+        });
+
+        const missingTags = tags.filter(tag => !existingTags.some(existingTag => existingTag.id === tag));
+
+        if (missingTags.length > 0) {
+            return next(new Error(`I seguenti tag non esistono: ${missingTags.join(', ')}`));
+        }
+
+
+        // Crea il nuovo post connettendo la categoria
         const newPost = await prisma.post.create({
             data: {
                 title: title,
@@ -60,16 +89,27 @@ const store = async (req, res) => {
                 image: image,
                 content: content,
                 published: published,
-                category: category
+                category: {
+                    connect: { id: category }
+                },
+                tags: {
+                    connect: existingTags.map(tag => ({ id: tag.id }))
+                }
             }
         });
 
-        res.json(`Post ${newPost.title} creato correttamente`);
-
+        res.json({ data: newPost, comment: "Post creato correttamente" });
     } catch (e) {
         console.error(e);
+        if (!res.headersSent) {
+            res.status(500).json("Si è verificato un errore durante la creazione del post");
+        }
     }
 };
+
+
+
+
 
 
 const update = async (req, res) => {

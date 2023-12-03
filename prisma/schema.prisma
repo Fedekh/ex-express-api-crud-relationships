@@ -13,8 +13,8 @@ datasource db {
 model Post {
   // @@map("posts") per sovrascrivere nome tabella 
   id         Int       @id @default(autoincrement())
-  category   Category? @relation(fields: [categoryId], references: [id]) //1:N
   categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id]) //1:N
   tags       Tag[]
   title      String    @db.VarChar(50)
   slug       String    @unique
@@ -28,7 +28,7 @@ model Post {
 model Category {
   id        Int      @id @default(autoincrement())
   title     String   @db.VarChar(50)
-  post      Post[]
+  posts     Post[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
