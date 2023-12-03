@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const postController = require('../controllers/PostController');
+const { query, param, body } = require("express-validator");
+
 
 //GetAll
 router.get('/', postController.index);
@@ -9,7 +11,7 @@ router.get('/', postController.index);
 router.get('/:slug', postController.show);
 
 //Post
-router.post('/', postController.store);
+router.post('/', body("title").notEmpty(), postController.store);
 
 //put
 router.put("/:slug", postController.update);

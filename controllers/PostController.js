@@ -1,8 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const slugify = require("slugify");
 const prisma = new PrismaClient();
-
-
+const { validationResult } = require("express-validator");
 const index = async (req, res) => {
     try {
         const { page = 1, pageSize = 10 } = req.query;
@@ -15,15 +14,15 @@ const index = async (req, res) => {
             take: +pageSize,
             skip: (+page - 1) * +pageSize,
             include: {
-                category: true,
-                tags: true
+                category: { select: { title: true } },
+                tags: { select: { title: true } }
             }
         });
 
         res.json({
-            data: data,
             currentPage: +page,
             totalPages: totalPages,
+            data: data
         });
     }
     catch (error) {
@@ -39,7 +38,10 @@ const show = async (req, res) => {
         const { slug } = req.params;
         const data = await prisma.post.findUnique({
             where: { slug: slug },
-            include: { category: { select: { title: true } }, tags: { select: { title: true } } }
+            include: {
+                category: { select: { title: true } },
+                tags: { select: { title: true } }
+            }
         });
 
         if (!data) {
@@ -57,6 +59,13 @@ const show = async (req, res) => {
 
 const store = async (req, res, next) => {
     try {
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            console.log(validation);
+            return next(new Error(validation.array));
+        }
+
+
         const { title, content, image, published, category, tags } = req.body;
 
         // Verifica se la categoria esiste
@@ -70,11 +79,11 @@ const store = async (req, res, next) => {
 
 
         // Verifica se i tag esistono
-        const existingTags = await prisma.tag.findMany({
+        const tagEsistenti = await prisma.tag.findMany({
             where: { id: { in: tags } }
         });
 
-        const missingTags = tags.filter(tag => !existingTags.some(existingTag => existingTag.id === tag));
+        const missingTags = tags.filter(tag => !tagEsistenti.some(existingTag => existingTag.id === tag));
 
         if (missingTags.length > 0) {
             return next(new Error(`I seguenti tag non esistono: ${missingTags.join(', ')}`));
@@ -93,7 +102,7 @@ const store = async (req, res, next) => {
                     connect: { id: category }
                 },
                 tags: {
-                    connect: existingTags.map(tag => ({ id: tag.id }))
+                    connect: tagEsistenti.map(tag => ({ id: tag.id }))
                 }
             }
         });

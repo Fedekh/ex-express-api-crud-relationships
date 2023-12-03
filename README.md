@@ -26,6 +26,10 @@ npm i dotenv express @prisma/client
 npm install -D nodemon
 npm install -D prisma
 
+validarzione:
+npm install express-validator
+
+
 inizializzazione di Prisma, utilizzando MySQL come DBMS.
 
 npx prisma init --datasource-provider mysql
