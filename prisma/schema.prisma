@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  // @@map("posts") per sovrascrivere nome tabella 
+  id         Int       @id @default(autoincrement())
+  category   Category? @relation(fields: [categoryId], references: [id]) //1:N
+  categoryId Int?
+  tags       Tag[]
+  title      String    @db.VarChar(50)
+  slug       String    @unique
+  image      String?   @db.Text
+  content    String    @db.Text
+  published  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(50)
+  post      Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(50)
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

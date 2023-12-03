@@ -15,3 +15,46 @@ BONUS:
 Implementare le operazioni di CRUD per il modello Category.
 Implementare le operazioni di CRUD per il modello Tag.
 Implementare le validazioni tramite Schema e middleware dedicato.
+
+
+
+
+----------------------------------------------------------------- 
+installazioni necessarie:
+npm init
+npm i dotenv express @prisma/client
+npm install -D nodemon
+npm install -D prisma
+
+inizializzazione di Prisma, utilizzando MySQL come DBMS.
+
+npx prisma init --datasource-provider mysql
+
+in file .env:
+DATABASE_URL="mysql://root:root@localhost:8889/blog"
+
+
+prima migration:
+npx prisma migrate dev --name prima_migration
+
+scaffolding iniziale:
+
+const express = require("express");
+require("dotenv").config();
+const routerPost = require("./routers/post");
+const app = express();
+const port = +process.env.PORT || 5555;
+const { log } = require("console");
+
+//middleware riceve in input i dati e nel output json
+app.use(express.json());
+
+app.use("/posts", routerPost);
+
+
+//avvio app
+app.listen(port, () => {
+  log(`App avviata su http://localhost:${port}`);
+});
+
+
