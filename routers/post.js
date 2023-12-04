@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const postController = require('../controllers/PostController');
-const { query, param, body } = require("express-validator");
+const { query, param, body,checkSchema } = require("express-validator");
+const postCreate = require("../validations/post.js")
 
 
 //GetAll
@@ -11,7 +12,7 @@ router.get('/', postController.index);
 router.get('/:slug', postController.show);
 
 //Post
-router.post('/', body("title").notEmpty(), postController.store);
+router.post('/', checkSchema(postCreate), postController.store);
 
 //put
 router.put("/:slug", postController.update);
