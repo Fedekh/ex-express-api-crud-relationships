@@ -2,6 +2,9 @@ const { PrismaClient } = require("@prisma/client");
 const slugify = require("slugify");
 const prisma = new PrismaClient();
 const { validationResult } = require("express-validator");
+const errorHandler = require("../middleware/errorHandler");
+
+
 const index = async (req, res) => {
     try {
         const { page = 1, pageSize = 10 } = req.query;
@@ -22,6 +25,7 @@ const index = async (req, res) => {
         res.json({
             currentPage: +page,
             totalPages: totalPages,
+            totalResult:total,
             data: data
         });
     }
@@ -62,7 +66,7 @@ const store = async (req, res, next) => {
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             console.log(validation);
-            return next(new Error(validation.array));
+            return next(new Error(errorHandler));
         }
 
 

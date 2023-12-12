@@ -30,8 +30,7 @@ validarzione:
 npm install express-validator
 
 
-inizializzazione di Prisma, utilizzando MySQL come DBMS.
-
+inizializzazione di Prisma, utilizzando MySQL come DBMS:
 npx prisma init --datasource-provider mysql
 
 in file .env:
@@ -41,6 +40,8 @@ DATABASE_URL="mysql://root:root@localhost:8889/blog"
 prima migration:
 npx prisma migrate dev --name prima_migration
 
+
+--------------------------------------------------------------
 scaffolding iniziale:
 
 const express = require("express");
