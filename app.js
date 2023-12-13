@@ -10,7 +10,7 @@ const { log } = require("console");
 
 // Configurazione più dettagliata di cors
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
 }));
