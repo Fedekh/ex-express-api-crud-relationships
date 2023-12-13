@@ -9,11 +9,7 @@ const port = +process.env.PORT || 5555;
 const { log } = require("console");
 
 // Configurazione più dettagliata di cors
-app.use(cors({
-    origin: "http://localhost",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-}));
+app.use(cors('*'));
 
 
 //middleware per parsing body
